@@ -3,17 +3,19 @@ import logo from './logo.svg';
 import { Button, Form, Grid, Header, Image, Message, Segment,Card } from 'semantic-ui-react';
 
 class Conf extends Component {
-    constructor(props){
-        super(props);
-        this.error={data:''};
-        this.conf={host:'localhost',dbname:'',port:3306,user:'root',pass:''};
-    }
-
-    jalan(e){
-        var fs=require('fs');
-        if(1000<=this.conf.port&&''!==this.conf.dbname&&''!==this.conf.host&&''!==this.conf.user&&''!==this.conf.pass){
-            var mysql=require('mysql');
-            var c=mysql.createConnection({host:this.conf.host,port:this.conf.port,database:this.conf.dbname,user:this.conf.user,password:this.conf.pass});
+    state={error:{data:''},conf:{host:'localhost',port:'3306',database:'',user:'root',password:''}};
+    handleChange = (e, {name, value} ) => this.setState( { [name] : value } )
+    jalan=()=>{
+        const{error,conf}=this.state
+		const fs=require('fs');
+		const mysql=require('mysql');
+        if(1000<=conf.port&&''!==conf.dbname&&''!==conf.host&&''!==conf.user){
+            fs.writeFile('dbkonf',JSON.stringify(conf),function(e){
+                var c=mysql.createConnection({host:conf.host,port:conf.port,database:'mysql',user:conf.user,password:conf.password});
+            c.connect();
+            c.query('create database if not exists '+conf.database,function(e,r,f){});
+            c.end();
+            c=mysql.createConnection(conf);
             c.connect();
             c.query('create table if not exists resep(nama varchar(25)primary key,jenis varchar(10)not null,gbr text not null,ket text not null)',
             function(e,r,f){});
@@ -25,28 +27,33 @@ class Conf extends Component {
             function(e,r,f){
                 c.query('alter table langkah add foreign key(resep)references resep(kode)on update cascade on delete cascade',function(e,r,f){});
             });c.end();
+            window.location.reload();
+            });
         }else alert('Tolong Diisi Semua!');
     }
 
     render() {
+        const{error,conf}=this.state
     return (
       <Grid textAlign='center' style={{ height: '100%' }} verticalAlign='middle'>
         <Grid.Column style={{ maxWidth: 450 }}>
             <Header as='h2' color='teal' textAlign='center'>
                 <img src={logo}/>{' '}Konfigurasi Basis Data
             </Header>
-            <Form size='large'>
+            <Form size='large' onSubmit={this.jalan}>
                 <Segment stacked>
-                    <Form.Input fluid icon='desktop' iconPosition='left' placeholder='Host *' value={this.conf.host} type="text"/>
-                    <Form.Input fluid icon='plug' iconPosition='left' placeholder='Port *' value={this.conf.port} type="text"/>
-                    <Form.Input fluid icon='database' iconPosition='left' placeholder='Nama Database *' value={this.conf.dbname} type="text"/>
-                    <Form.Input fluid icon='user' iconPosition='left' placeholder='Host *' value={this.conf.user} type="text"/>
-                    <Form.Input fluid icon='lock' iconPosition='left' placeholder='Password' value={this.conf.pass} type="password"/>
-                    <Button color='teal' fluid size='large' onClick={this.jalan}>Login</Button>
+                    <Form.Input fluid icon='desktop' iconPosition='left' placeholder='Host *' defaultValue={conf.host} onChange={this.handleChange}/>
+                    <Form.Input fluid icon='plug' iconPosition='left' placeholder='Port *' defaultValue={conf.port} onChange={this.handleChange}/>
+                    <Form.Input fluid icon='database' iconPosition='left' placeholder='Nama Database *' defaultValue={conf.database}
+					onChange={this.handleChange}/>
+                    <Form.Input fluid icon='user' iconPosition='left' placeholder='Host *' defaultValue={conf.user} onChange={this.handleChange}/>
+                    <Form.Input fluid icon='lock' iconPosition='left' placeholder='Password' defaultValue={conf.password} onChange={this.handleChange}
+            type="password"/>
+                    <Button color='teal' fluid size='large'>Login</Button>
                 </Segment>
             </Form>
             <Message negative>
-                <Message.Header>{this.error.data}</Message.Header>
+                <Message.Header>{error.data}</Message.Header>
             </Message>
         </Grid.Column>
       </Grid>

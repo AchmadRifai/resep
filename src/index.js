@@ -6,5 +6,7 @@ import Conf from './Conf';
 import 'semantic-ui-css/semantic.min.css';
 import registerServiceWorker from './registerServiceWorker';
 
-ReactDOM.render(<Conf />, document.getElementById('root'));
+const pathExists = require('path-exists');
+if(pathExists.sync('dbkonf'))ReactDOM.render(<App />, document.getElementById('root'));
+else ReactDOM.render(<Conf />, document.getElementById('root'));
 registerServiceWorker();
