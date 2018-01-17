@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "axios": "^0.17.1",
+    "axios-fileupload": "0.0.1",
     "fs2": "^0.2.7",
     "mysql": "^2.15.0",
     "path-exists": "^3.0.0",
